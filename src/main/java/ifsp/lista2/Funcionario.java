@@ -1,5 +1,9 @@
 package ifsp.lista2;
 
+/*
+ * Classe Funcionário 2.0 
+ */
+
 public class Funcionario {
 
 	// Usamos conceito de encapsulamento
@@ -39,7 +43,7 @@ public class Funcionario {
 	
 	//Métodos funcionais
 	public String exibirDadosCadastro() {
-		String cabecalho = "===== Funcionário Cadastrado ======\n";
+		String cabecalho = "\n===== Funcionário Cadastrado ======\n";
 		String detalheMarca = "Nome: " + this.nome + "\n";
 		String detalheCargo = "Cargo: " + this.cargo + "\n";
 		String detalheSalario = "Salário: " + this.salario + "\n";
@@ -51,4 +55,5 @@ public class Funcionario {
 	public String toString() {
 		return exibirDadosCadastro();
 	}
+	
 }
