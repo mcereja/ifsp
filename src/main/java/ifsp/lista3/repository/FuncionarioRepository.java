@@ -3,7 +3,7 @@ package ifsp.lista3.repository;
 import java.util.ArrayList;
 import java.util.List;
 
-import ifsp.lista2.Funcionario;
+import ifsp.lista3.model.Funcionario;
 
 /*
  * Representa o objeto de persistencia ou operacoes no banco de dados

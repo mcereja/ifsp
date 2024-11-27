@@ -4,22 +4,24 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
-import ifsp.lista2.Funcionario;
+import ifsp.lista3.controller.FuncionarioActionAddController;
 import ifsp.lista3.controller.FuncionarioActionExibirController;
-import ifsp.lista3.repository.FuncionarioRepository;
+import ifsp.lista3.controller.FuncionarioActionSairController;
 
 public class CadastroFuncionario extends JFrame implements ActionListener {
 
@@ -28,8 +30,6 @@ public class CadastroFuncionario extends JFrame implements ActionListener {
 	private JTextField txtNome;
 	private JTextField txtCargo;
 	private JFormattedTextField ftxSalario;
-	
-	private FuncionarioRepository repository = new FuncionarioRepository();
 	
 	/**
 	 * Launch the application.
@@ -52,16 +52,16 @@ public class CadastroFuncionario extends JFrame implements ActionListener {
 	 */
 	public CadastroFuncionario() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 614, 432);
+		setBounds(100, 100, 614, 358);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
 		JLabel lblTitulo = new JLabel("Cadastro de Funcionários");
-		lblTitulo.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 14));
+		lblTitulo.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 16));
 		lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
-		lblTitulo.setBounds(12, 12, 590, 15);
+		lblTitulo.setBounds(12, 12, 590, 25);
 		contentPane.add(lblTitulo);
 		
 		JLabel lblNome = new JLabel("Nome");
@@ -92,49 +92,27 @@ public class CadastroFuncionario extends JFrame implements ActionListener {
 		ftxSalario.setColumns(10);
 		
 		JButton btnAdicionar = new JButton("Adicionar");
-		btnAdicionar.setBounds(27, 351, 117, 25);
+		btnAdicionar.setBounds(10, 270, 117, 25);
 		contentPane.add(btnAdicionar);
-		
+
 		JButton btnExibir = new JButton("Exibir");
-		btnExibir.setBounds(259, 351, 117, 25);
+		var acaoExibir = new FuncionarioActionExibirController(txtNome, 
+				txtCargo, ftxSalario);
+		btnExibir.addActionListener(acaoExibir);
+		btnExibir.setBounds(254, 270, 117, 25);
 		contentPane.add(btnExibir);
 		
 		JButton btnSair = new JButton("Sair");
-		btnSair.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				//JOptionPane.showMessageDialog(null, repository.listar());
-
-  //  a var icon, seria o ultimo argumento da showConfirmDialog
-  //            ImageIcon icon = new ImageIcon("src/images/turtle64.png");
-				 
-				int respostaUsuario = JOptionPane.showConfirmDialog(null,
-						"Lista Cadastrada: " + repository.listar(), 
-						"Deseja sair ?",
-						JOptionPane.YES_NO_OPTION,
-						JOptionPane.INFORMATION_MESSAGE);
-				
-				// 0=SIM 1=NAO 2=CANCEL
-				if ( respostaUsuario == 0 ) {
-					System.exit(EXIT_ON_CLOSE);	
-				}
-				
-			}
-		});
-		btnSair.setBounds(463, 351, 117, 25);
+		FuncionarioActionSairController acaoSair = 
+				new FuncionarioActionSairController();
+		btnSair.addActionListener(acaoSair);
+		btnSair.setBounds(471, 270, 117, 25);
 		contentPane.add(btnSair);
 		
-		// Antes das acoes dos botoes devemos preparar o funcionario
-		//double salario = Double.valueOf(txtSalario.getText());
-		//Funcionario funcionario = new Funcionario(txtNome.getText(), txtCargo.getText(), 0);
-		//FuncionarioController controller = new FuncionarioController(txtNome, txtCargo, txtSalario);
-		//btnAdicionar.addActionListener(controller);
-		
-		System.out.println("FORA:::" + txtNome.getText());
-		btnAdicionar.addActionListener(this);
+		FuncionarioActionAddController acaoAdd = 
+				new FuncionarioActionAddController(txtNome, txtCargo, ftxSalario);
+		btnAdicionar.addActionListener(acaoAdd);
 
-	  // Botao exibir usamos uma classe separada, supondo um codigo grande
-		btnExibir.addActionListener(new FuncionarioActionExibirController(txtNome));
-		
 	}
 
 	public NumberFormatter formatadorInt(int inicio, int fim) {
@@ -146,17 +124,49 @@ public class CadastroFuncionario extends JFrame implements ActionListener {
 		formatter.setAllowsInvalid(false);
 		return formatter;
 	}
-
+	
+	public NumberFormatter formatadorSalario(BigDecimal inicio, BigDecimal fim) {
+		NumberFormat numberFormat = NumberFormat.getInstance();
+		NumberFormatter formatter = new NumberFormatter(numberFormat);
+		formatter.setValueClass(BigDecimal.class);
+		formatter.setMinimum(inicio);
+		formatter.setMaximum(fim);
+		formatter.setAllowsInvalid(false);
+		return formatter;
+	}
+	
+	public DefaultFormatterFactory formatadorSalario() {
+		try {
+            // Define a máscara para números decimais com até 2 casas decimais
+            MaskFormatter mascara = new MaskFormatter("####.##");
+            mascara.setInvalidCharacters(""); // Permite apenas números e ponto
+            return new DefaultFormatterFactory(mascara);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+	}
+	
+	public NumberFormatter novoFormatador() {
+		NumberFormatter mascara = new NumberFormatter();
+		mascara.setValueClass(NumberFormat.getCurrencyInstance().getClass());
+		mascara.setMinimum(1.0);
+		mascara.setMaximum(9999.99);
+		mascara.setFormat(NumberFormat.getCurrencyInstance());
+		//mascara.setAllowsInvalid(false);
+		return mascara;
+	}
+	
   //  Tem que implements ActionListener e sobrescrever esse metodo da classe pai
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		System.out.println("DENTRO:::" + txtNome.getText());
-		JOptionPane.showMessageDialog(null, "Nome: "+txtNome.getText(), 
-				"Botão ADD", JOptionPane.INFORMATION_MESSAGE);
-		double salario = Double.valueOf(ftxSalario.getText());
-		Funcionario funcionario = new Funcionario(txtNome.getText(), 
-				txtCargo.getText(), salario);
-		repository.adicionar(funcionario);
+//		System.out.println("DENTRO:::" + txtNome.getText());
+//		JOptionPane.showMessageDialog(null, "Nome: "+txtNome.getText(), 
+//				"Botão ADD", JOptionPane.INFORMATION_MESSAGE);
+//		double salario = Double.valueOf(ftxSalario.getText());
+//		Funcionario funcionario = new Funcionario(txtNome.getText(), 
+//				txtCargo.getText(), salario);
+//		repository.adicionar(funcionario);
 	}
 	
 }
